@@ -1,0 +1,108 @@
+{% extends 'base.html' %} {% load bootstrap4 %} {% block body %}
+<!-- bradcam_area  -->
+<div class="bradcam_area bradcam_bg_1">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="bradcam_text">
+                    <h3>{{Absenses|length}}+ Absense Available</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--/ bradcam_area  -->
+
+<div class="pt-4 pb-4" style="padding-left: 90%;">
+    <div class="apply_now">
+        <a href="{% url 'employe:getEmploye' %}" class="bg-warning text-dark boxed-btn2">اضافة تسجيل دخول </a>
+    </div>
+
+</div>
+
+<!-- job_listing_area_start  -->
+<div class="job_listing_area plus_padding">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="job_filter white-bg">
+                    <div class="form_inner white-bg">
+                        <h3>Filter</h3>
+                        <form method="GET">
+                            {%bootstrap_form my_filter.form%}
+                            <div class="reset_btn">
+                                <button class="boxed-btn3 w-100" type="submit">Search</button>
+                            </div>
+                        </form>
+                    </div>
+
+
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="recent_joblist_wrap">
+                    <div class="recent_joblist white-bg ">
+                        <div class="row align-items-center">
+                            <div class="col-md-6 align-center">
+                                <h4>الغيابات الموجوده</h4>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="job_lists m-0">
+                    <div class="row">
+
+
+                        {% for job in Absenses %}
+                        <div class="col-lg-12 mb-4 ml-2">
+                            <div class="card" style="width:auto;">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item text-center bg-dark text-white">
+                                        <p class=" text-info  float-right font-weight-bold">الاسم :</p> {{job}}
+                                    </li>
+                                    <li class="list-group-item">{{job.date}}
+                                        <p class=" text-info  float-right font-weight-bold">: تاريخ الحضور
+                                        </p>
+                                    </li>
+                                    <li class="list-group-item">{{job.timeIn}}
+                                        <p class=" text-info  float-right font-weight-bold">: معاد الحضور
+                                        </p>
+                                    </li>
+
+                                    <li class="list-group-item">
+                                        <p class=" text-info  float-right font-weight-bold"> : معاد الخروج </p>
+
+                                        {{job.timeOut}}
+                                    </li>
+
+
+
+                                    {% if job.timeOut %} {% else %}
+                                    <li class="list-group-item ">
+                                        <div class="jobs_right">
+                                            <div class="apply_now">
+                                                <a href="{% url 'employe:signOutAbsense' job.id %}" class="boxed-btn3 w-100">تسجيل الخروج </a>
+                                            </div>
+
+                                        </div>
+
+                                    </li>
+                                    {% endif %}
+
+                                </ul>
+                            </div>
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+
+
+                    {% endblock body %}

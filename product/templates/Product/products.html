@@ -1,0 +1,97 @@
+{% extends 'base.html' %} {% load bootstrap4 %} {% block body %}
+<!-- bradcam_area  -->
+<div class="bradcam_area bradcam_bg_1">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="bradcam_text">
+                    <h3> يوجد {{Products|length}} منتجات او اكثر </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--/ bradcam_area  -->
+<div class="pt-4 pb-4" style="padding-left: 90%;">
+    <div class="apply_now">
+        <a href="{% url 'product:addProduct' %}" class="bg-warning text-dark boxed-btn2">اضافة منتج </a>
+    </div>
+
+</div>
+
+<!-- job_listing_area_start  -->
+<div class="job_listing_area plus_padding">
+    <div class="ml-5">
+        <div class="row">
+            <div class="col-lg-2 ">
+                <div class="job_filter white-bg">
+                    <div class="form_inner white-bg">
+                        <h3>Filter</h3>
+                        <form method="GET">
+                            {%bootstrap_form my_filter.form %}
+                            <div class="reset_btn">
+                                <button class="boxed-btn3 w-100" type="submit">Search</button>
+                            </div>
+                        </form>
+                    </div>
+
+
+                </div>
+            </div>
+            <div class="col-lg-10">
+                <div class="recent_joblist_wrap">
+                    <div class="recent_joblist white-bg ">
+                        <div class="row align-items-center">
+                            <div class="col-md-6 align-center">
+                                <h4>المنتجات الموجوده</h4>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="job_lists m-0">
+                    <div class="row">
+                        {% for prod in Products %}
+                        <div class="col-sm-3 mt-4 ml-1 ">
+                            <div class="card" style="width: 18rem;">
+                                <div class="text-center" style="max-height: 200px; min-height: 200px;">
+                                    <img src="{{prod.img.url}}" style=" max-height: 200px;" class="card-img-top" alt="...">
+                                </div>
+
+                                <div class="card-body">
+                                    <h2 class="card-title font-weight-bold text-center">{{prod.typ}} {{prod.category}} </h2>
+                                    <h3>
+                                        {{prod.typ}}
+                                        <p style="font-weight: bold; color: black; font-size: 20px; display: inline-block;"> : النوع</p>
+                                    </h3>
+                                    <h3>{{prod.color}}
+
+                                        <p style="font-weight: bold; color: black; font-size: 20px; display: inline-block;"> : اللون</p>
+                                    </h3>
+                                    <h3>{{prod.category}}
+
+                                        <p style="font-weight: bold; color: black; font-size: 20px; display: inline-block;"> : الصنف</p>
+                                    </h3>
+                                    <h3>{{prod.size}}
+
+                                        <p style="font-weight: bold; color: black; font-size: 20px; display: inline-block;"> : المقاس</p>
+                                    </h3>
+
+
+
+                                    <div>
+                                        <div class="price float-left font-weight-bold">{{prod.priceOut}} $</div>
+                                        <a href="#" class="btn btn-success float-right">شراء</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                    </div>
+
+
+
+
+                    {% endblock body %}
