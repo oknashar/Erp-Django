@@ -1,0 +1,118 @@
+{% extends 'base.html' %} {% load bootstrap4 %} {% block body %}
+
+<!-- bradcam_area  -->
+<div class="bradcam_area bradcam_bg_1">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="bradcam_text">
+                    <h3>جميع المبيعات</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--/ bradcam_area  -->
+{% include "messaged.html" %}
+
+<div class="job_listing_area plus_padding">
+    <div class="ml-5">
+        <d class="row">
+
+            {% if my_filter %}
+            <div class="col-lg-2 ">
+                <div class="job_filter bg-white ">
+                    <div class="form_inner bg-white">
+                        <h3 class="text-white">Filter</h3>
+                        <form method="GET">
+                            {%bootstrap_form my_filter.form %}
+                            <div class="reset_btn pb-4 pt-3">
+                                <button class="btn btn-dark h-50 w-100" type="submit">بحث</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+
+
+            <!--Dropdown primary-->
+            <div class="col-lg-9">
+                <div class="dropdown">
+
+
+                    <!--Trigger-->
+
+                    <!--/Dropdown primary-->
+
+
+                    {% for ord in order %}
+
+                    <div class="container">
+                        <div class="table-responsive text-nowrap">
+
+                            <div>
+                                <div class="float-left">
+                                    <div class="btn btn-dark " style="display: inline-block;">{{ord.user}} </div>
+                                    <p style="display: inline-block; color: black; font-weight: bold; font-size: 20px;"> اسم الكاشير :</p>
+                                </div>
+
+                                <div class="float-right">
+                                    <div class="btn btn-dark " style="display: inline-block;">{{ord.emp}} </div>
+                                    <p style="display: inline-block; color: black; font-weight: bold; font-size: 20px;"> اسم العامل :</p>
+                                </div>
+                                <div class="float-left mt-5" style="padding-left:20% ;">
+                                    <div class="btn btn-info " style="display: inline-block;">{{ord.order_date}} </div>
+                                    <p style="display: inline-block; color: black; font-weight: bold; font-size: 20px;">: تاريخ البيع </p>
+                                </div>
+                            </div>
+                            <table class="table">
+
+                                <thead class="bg-dark text-white">
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">اسم المنتج</th>
+                                        <th scope="col">سعر المنتج</th>
+                                        <th scope="col">الكميه</th>
+                                        <th scope="col">السعر الكلي</th>
+                                        <th scope="col"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in ord.items.all %}
+                                    <tr>
+                                        <th scope="row">{{forloop.counter}}</th>
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.item.priceOut}}</td>
+                                        <td class="align-center">
+                                            {{item.quantity}}
+                                        </td>
+
+                                        <td>{{item.getTotal}}</td>
+
+                                        <td>
+                                            <a href="{% url 'product:removeProductfromOrder' item.item.barcode ord.id %}"> <i class="fas fa-trash float-right"></i></a>
+                                        </td>
+                                    </tr>
+
+                                    {% endfor %} {% if order.user %}
+                                    <tr>
+                                        <td colspan="4">Order Total</td>
+                                        <td class="font-weight-bold">{{ord.getTotalall}}$</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                    <hr> {% endfor %}
+                    <div class="align-center" style="padding-left: 49%;">
+                        <div class="btn btn-dark " style="display: inline-block;">{{allPrice}} $</div>
+                        <p style="display: inline-block; color: black; font-weight: bold; font-size: 20px;"> الحساب الكلي :</p>
+                    </div>
+
+
+                </div>
+                {% endblock body %}

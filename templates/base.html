@@ -14,6 +14,7 @@
     <!-- Place favicon.ico in the root directory -->
 
     <!-- CSS here -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css">
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css'%}">
     <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css '%}">
     <link rel="stylesheet" href="{% static 'css/magnific-popup.css '%}">
@@ -28,6 +29,11 @@
 
     <link rel="stylesheet" href="{% static 'css/style.css '%}">
     <!-- <link rel="stylesheet" href="css/responsive.css"> -->
+    <script type="text/javascript">
+        setTimeout(function() {
+            document.getElementById('timealert').style.display = 'none';
+        }, 5000);
+    </script>
 </head>
 
 <body>
@@ -71,6 +77,24 @@
                                                     <li><a href="{% url 'employe:getDayAbsense' %}"> المسجل حضورهم اليوم</a></li>
 
                                                 </ul>
+
+                                            </li>
+
+                                            <li><a href="#">المبيعات <i class="ti-angle-down"></i></a>
+                                                <ul class="submenu">
+                                                    <li><a href="{% url 'product:Orders' %}">عرض المبيعات</a></li>
+                                                    <li><a href="{% url 'product:DayOrders' %}">عرض مبيعات اليوم</a></li>
+
+                                                </ul>
+
+                                            </li>
+
+                                            <li><a href="#">المنتجات <i class="ti-angle-down"></i></a>
+                                                <ul class="submenu">
+                                                    <li><a href="{% url 'product:getProduct' %}">عرض المنتجات</a></li>
+
+                                                </ul>
+
                                             </li>
                                             {% endif %}
                                             <li><a href="/">الرئيسيه</a></li>
@@ -88,6 +112,12 @@
                                     <div class="phone_num d-none d-xl-block">
                                         <a href="/accounts/logout">Logout</a>
                                     </div>
+                                    <div class="phone_num d-none d-xl-block">
+                                        <a href="/product/ordersummery">Cart <i class="fas fa-cart-plus" style="color: aliceblue;"></i></a>
+                                    </div>
+                                    <div class="phone_num d-none d-xl-block">
+                                        <a href="/admin">Admin Login</a>
+                                    </div>
                                     {% else %}
                                     <div class="phone_num d-none d-xl-block">
                                         <a href="#" g in</a>
@@ -95,9 +125,11 @@
                                     <div class="phone_num d-none d-xl-block">
                                         <a href="/accounts/signup">Register</a>
                                     </div>
+
                                     <div class="phone_num d-none d-xl-block">
                                         <a href="/accounts/login">Login</a>
                                     </div>
+
                                     {% endif %}
 
 
@@ -121,6 +153,7 @@
 
     <!-- link that opens popup -->
     <!-- JS here -->
+    <script src="{% static 'js/vendor/modernizr-3.5.0.min.js '%}"></script>
     <script src="{% static 'js/vendor/modernizr-3.5.0.min.js '%}"></script>
     <script src="{% static 'js/vendor/jquery-1.12.4.min.js '%}"></script>
     <script src="{% static 'js/popper.min.js '%}"></script>

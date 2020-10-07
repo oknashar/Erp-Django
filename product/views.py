@@ -2,9 +2,16 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .forms import CategoryForm,ColorForm,TypeForm,creatorForm
 from .models import Category,Color,Type,creator
 from .filters import ColorFilter,CategoryFilter,TypeFilter,creatorFilter
-from product.models import Product
-from product.filters import ProductFilter
+from product.models import Order, OrderItem, Product
+from product.filters import Order2Filter, OrderFilter, ProductFilter
 from product.forms import ProductForm
+from django.contrib import messages
+from django.views.generic import  DeleteView,View
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from employe.models import Absense,Employe
+import datetime
 
 # Create your views here.
 
@@ -268,3 +275,235 @@ def delete_Product(request,id):
     product =Product.objects.get(id=id).delete()
 
     return redirect('/Product')
+
+@login_required
+def add_to_cart(request,barcode):
+    item = get_object_or_404(Product,barcode=barcode)
+    item.quantity -=1
+    item.save()
+    order_item,created  = OrderItem.objects.get_or_create(
+        item=item,
+        user =request.user,
+        ordered =False
+        )
+    order_qs = Order.objects.filter(user=request.user,ordered=False)
+    if order_qs.exists():
+        order = order_qs[0]
+        #check if the order item is in order
+
+        if order.items.filter(item__barcode=item.barcode).exists():
+            order_item.quantity +=1
+            order_item.save()
+            messages.info(request,"this Product quantity was updated")
+            return redirect('product:orderSummery')
+        else:
+            messages.info(request,"this Product was added to your cart")
+            order.items.add(order_item)
+            return redirect('product:orderSummery')
+    else:
+        order = Order.objects.create(user=request.user)
+        order.items.add(order_item)
+        messages.info(request,"this Product was added to your cart")
+    return redirect('product:orderSummery')
+@login_required
+def remove_from_cart(request,barcode):
+    item = get_object_or_404(Product,barcode=barcode)
+    item.quantity +=1
+    item.save()
+    order_qs = Order.objects.filter(user=request.user,ordered=False)
+    if order_qs.exists():
+        order = order_qs[0]
+        #check if the order item is in order
+
+        if order.items.filter(item__barcode=item.barcode).exists():
+            order_item=OrderItem.objects.filter(
+                item=item,
+                user=request.user,
+                ordered = False
+            )[0]
+            if order_item.quantity >1.0:
+                order_item.quantity -=1
+                order_item.save()
+                messages.info(request,"this Product was Updated")
+            else:
+               order.items.remove(order_item)
+               order_item.delete()
+               messages.info(request,"this Product was removed from your cart")
+        else:
+            #* adding a message that the user dosn't contain the product
+            messages.info(request,"this Product wasn't in your cart")
+            print('2')
+            return redirect('product:getProduct')
+    else:
+        #* adding a message that the user dosn't have an order
+        messages.info(request,"You don't have an active order")
+        print('3')
+        return redirect('product:getProduct')
+
+    return redirect('product:orderSummery')
+
+@login_required
+def remove_Product_from_cart(request,barcode):
+    item = get_object_or_404(Product,barcode=barcode)
+    order_qs = Order.objects.filter(user=request.user,ordered=False)
+    if order_qs.exists():
+        order = order_qs[0]
+        #check if the order item is in order
+
+        if order.items.filter(item__barcode=item.barcode).exists():
+            order_item=OrderItem.objects.filter(
+                item=item,
+                user=request.user,
+                ordered = False
+            )[0]
+            item.quantity += order_item.quantity
+            item.save()
+            order.items.remove(order_item)
+            order_item.delete()
+            messages.info(request,"this Product was removed from your cart")
+        else:
+            #* adding a message that the user dosn't contain the product
+            messages.info(request,"this Product wasn't in your cart")
+            print('2')
+            return redirect('product:getProduct')
+    else:
+        #* adding a message that the user dosn't have an order
+        messages.info(request,"You don't have an active order")
+        print('3')
+        return redirect('product:getProduct')
+
+    return redirect('product:orderSummery')
+
+
+class OrderSummery(LoginRequiredMixin , View):
+    def get(self, *args, **kwargs):
+        try:
+            absense=Absense.objects.filter(date=datetime.date.today().strftime("%Y-%m-%d"))
+            order ,create= Order.objects.get_or_create(user=self.request.user,ordered=False)
+            context={
+                'object':order,
+                'absense':absense
+            }
+            return render(self.request,'Product/orderSummery.html',context) 
+        except ObjectDoesNotExist:
+            messages.ERROR(self.request,"You dont have an active order")
+            return redirect('/')
+def updateOrder(request,id):
+    employe = Employe.objects.get(id=id)
+    order = Order.objects.get(user=request.user,ordered=False)  
+    order.emp =employe
+    order.save()
+    return redirect('product:orderSummery')
+
+def checkOut(request):
+    order = Order.objects.get(user=request.user,ordered=False) 
+    for orderitem in order.items.all():
+        orderitem.ordered = True
+        orderitem.save()
+    
+    if order.emp :
+        order.ordered =True
+        order.save()
+        return redirect('product:getProduct')
+    else:
+        messages.error(request,'You Should select an employe')
+    
+    return redirect('product:getProduct')
+
+
+
+def getOrders(request):
+    order = Order.objects.filter(ordered =True)
+    x=0
+    for ord in order:
+        x+=ord.getTotalall()
+    
+    my_filter = OrderFilter(request.GET ,queryset=order)
+    OrderList = my_filter.qs
+
+    context={
+        'order':OrderList,
+        'allPrice':x,
+        'my_filter':my_filter
+    }
+    return render(request,'Product/getOrders.html',context)
+
+def getDayOrders(request):
+    order = Order.objects.filter(ordered =True,order_date__date=datetime.date.today().strftime("%Y-%m-%d"))
+    x=0
+    for ord in order:
+        x+=ord.getTotalall()
+    
+    my_filter = Order2Filter(request.GET ,queryset=order)
+    OrderList = my_filter.qs
+
+    context={
+        'order':OrderList,
+        'allPrice':x,
+        'my_filter':my_filter
+    }
+    return render(request,'Product/getOrders.html',context)
+
+def remove_Product_from_order(request,barcode,id):
+    item = get_object_or_404(Product,barcode=barcode)
+    order_qs = Order.objects.filter(user=request.user,ordered=True,id=id)
+    if order_qs.exists():
+        order = order_qs[0]
+        #check if the order item is in order
+
+        if order.items.filter(item__barcode=item.barcode).exists():
+            order_item=OrderItem.objects.filter(
+                item=item,
+                user=request.user,
+                ordered = True
+            )[0]
+            item.quantity += order_item.quantity
+            item.save()
+            order.items.remove(order_item)
+            order_item.delete()
+            if not order.items.filter(ordered=True).exists():
+                order.delete()
+            messages.info(request,"this Product was removed from your cart")
+        else:
+            #* adding a message that the user dosn't contain the product
+            messages.info(request,"this Product wasn't in your cart")
+            print('2')
+            return redirect('product:DayOrders')
+    else:
+        #* adding a message that the user dosn't have an order
+        messages.info(request,"You don't have an active order")
+        print('3')
+        return redirect('product:DayOrders')
+
+    return redirect('product:DayOrders')
+
+def getDataAndPushInOrder(request):
+    if request.POST:
+        barcode = request.POST.get('bar')
+        item = get_object_or_404(Product,barcode=barcode)
+        item.quantity -=1
+        item.save()
+        order_item,created  = OrderItem.objects.get_or_create(
+            item=item,
+            user =request.user,
+            ordered =False
+            )
+        order_qs = Order.objects.filter(user=request.user,ordered=False)
+        if order_qs.exists():
+            order = order_qs[0]
+            #check if the order item is in order
+
+            if order.items.filter(item__barcode=item.barcode).exists():
+                order_item.quantity +=1
+                order_item.save()
+                messages.info(request,"this Product quantity was updated")
+                return redirect('product:orderSummery')
+            else:
+                messages.info(request,"this Product was added to your cart")
+                order.items.add(order_item)
+                return redirect('product:orderSummery')
+        else:
+            order = Order.objects.create(user=request.user)
+            order.items.add(order_item)
+            messages.info(request,"this Product was added to your cart")
+        return redirect('product:orderSummery')

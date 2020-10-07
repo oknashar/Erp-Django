@@ -19,6 +19,11 @@
 
 </div>
 
+
+
+
+{% include "messaged.html" %}
+
 <!-- job_listing_area_start  -->
 <div class="job_listing_area plus_padding">
     <div class="ml-5">
@@ -60,7 +65,7 @@
                                 </div>
 
                                 <div class="card-body">
-                                    <h2 class="card-title font-weight-bold text-center">{{prod.typ}} {{prod.category}} </h2>
+                                    <h2 class="card-title font-weight-bold text-center">{{prod.typ}} {{prod.category}} {{prod.name}}</h2>
                                     <h3>
                                         {{prod.typ}}
                                         <p style="font-weight: bold; color: black; font-size: 20px; display: inline-block;"> : النوع</p>
@@ -73,16 +78,25 @@
 
                                         <p style="font-weight: bold; color: black; font-size: 20px; display: inline-block;"> : الصنف</p>
                                     </h3>
-                                    <h3>{{prod.size}}
-
-                                        <p style="font-weight: bold; color: black; font-size: 20px; display: inline-block;"> : المقاس</p>
-                                    </h3>
 
 
 
-                                    <div>
-                                        <div class="price float-left font-weight-bold">{{prod.priceOut}} $</div>
-                                        <a href="#" class="btn btn-success float-right">شراء</a>
+                                    <div class=" font-weight-bold">
+                                        <h3 class="">{{prod.priceOut}} $
+                                            <p style="font-weight: bold; color: black; font-size: 20px; display: inline-block;"> : السعر</p>
+                                        </h3>
+                                    </div>
+                                    <br>
+                                    <br>
+                                    <div class="align-center">
+                                        <div class="col">
+
+                                            <a href="{% url 'product:addToCart' prod.barcode %}" class="btn btn-success float-right w-25">شراء</a>
+                                        </div>
+                                        <div class="">
+
+                                            <a href="{% url 'product:removeFromCart' prod.barcode %}" class="btn btn-danger mr-4 w-25 float-left">استرجاع</a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

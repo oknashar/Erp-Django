@@ -1,5 +1,7 @@
 from django.db import models
 from django.utils.text import slugify
+from employe.models import Employe
+from django.contrib.auth.models import User
 # Create your models here.
 
 class Color(models.Model):
@@ -66,10 +68,44 @@ class Product(models.Model):
             string =str(self.name.code)+str(self.typ.code)+str(self.category.code)+str(self.color.code)+str(self.size)
             self.barcode = slugify(string)
          super(Product, self).save(*args, **kwargs) # Call the real save() method
-
-  
-       
-
+    def __str__(self):
+        string = str(self.typ)+' '+str(self.category)+' '+str(self.name)
+        return string
     class Meta:
         verbose_name = 'Product'
         verbose_name_plural = 'Products'
+
+class OrderItem(models.Model):
+    user  = models.ForeignKey(User, verbose_name=("الكاشير"), on_delete=models.CASCADE)
+    ordered  = models.BooleanField(default=False)
+    item = models.ForeignKey(Product, verbose_name=("المنتج"), on_delete=models.CASCADE)
+    quantity = models.IntegerField(("الكميه"),default=1)
+    def __str__(self):
+        return str(self.quantity)+' '+str(self.item) 
+    class Meta:
+        verbose_name = 'OrderItem'
+        verbose_name_plural = 'OrderItems'
+    def getTotal(self):
+        return self.quantity*self.item.priceOut
+
+class Order(models.Model):
+    user  = models.ForeignKey(User, verbose_name=("الكاشير"), on_delete=models.CASCADE)
+    emp  = models.ForeignKey(Employe,blank=True, null=True, verbose_name=("البائع"), on_delete=models.CASCADE)
+    items = models.ManyToManyField(OrderItem, verbose_name=("المنتجات المباعه"))
+    order_date = models.DateTimeField(("وقت البيع"),auto_now_add=True)
+    ordered  = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return str(self.user)
+
+    def getTotalall(self):
+        total =0
+        for item in self.items.all():
+            total += item.getTotal()
+        return total
+    def get_products(self):
+        return "\n".join([str(p) for p in self.items.all()])
+
+    class Meta:
+        verbose_name = 'Order'
+        verbose_name_plural = 'Orders'

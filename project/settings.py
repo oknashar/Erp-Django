@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django_filters',
     'employe',
     'product',
+    'fontawesome_5',
 ]
 
 MIDDLEWARE = [

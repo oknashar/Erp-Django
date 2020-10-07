@@ -1,0 +1,114 @@
+{% extends 'base.html' %} {% load bootstrap4 %} {% block body %}
+
+<!-- bradcam_area  -->
+<div class="bradcam_area bradcam_bg_1">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="bradcam_text">
+                    <h3>update New Product</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--/ bradcam_area  -->
+{% include "messaged.html" %}
+
+<!--Dropdown primary-->
+
+
+<form class="form-inline pt-5" action="{% url 'product:addtoCart' %}" method="POST">{% csrf_token %}
+    <div class="form-group mb-2 pr-5 " style="justify-content: center; padding-left: 40%;">
+        <label for="staticEmail2" class="p-1">Barcode</label>
+        <input autofocus type="text" name="bar">
+    </div>
+
+    <button type="submit" class="btn btn-primary mb-2">Enter</button>
+</form>
+
+<div class="dropdown">
+
+    {% if object.emp %}
+    <div class="btn btn-dark mb-20 mt-30 " style="margin-left: 50%;">
+        <button class="btn btn-dark dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{object.emp}}</button>
+
+        <!--Menu-->
+        <div class="dropdown-menu dropdown-dark">
+            {% for ab in absense %}
+            <a class="dropdown-item" href="{% url 'product:updateSummery' ab.name.id %}">{{ab.name}}</a> {% endfor %}
+        </div>
+    </div>{% else %}
+    <div class="btn btn-dark mb-20 mt-30 " style="margin-left: 50%;">
+        <button class="btn btn-dark  dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Choose</button>
+
+        <!--Menu-->
+        <div class="dropdown-menu dropdown-primary">
+            {% for ab in absense %}
+            <a class="dropdown-item" href="{% url 'product:updateSummery' ab.name.id %}">{{ab.name}}</a> {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+<!--Trigger-->
+
+<!--/Dropdown primary-->
+
+<div class="container">
+    <div class="table-responsive text-nowrap">
+        <table class="table">
+            <thead class="bg-dark text-white">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Item title</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Total item Price</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in object.items.all %}
+                <tr>
+                    <th scope="row">{{forloop.counter}}</th>
+                    <td>{{item.item}}</td>
+                    <td>{{item.item.priceOut}}</td>
+                    <td>
+                        <a href="{% url 'product:removeFromCart' item.item.barcode %}"> <i class="fas fa-minus mr2"></i> </a>
+                        {{item.quantity}}
+                        <a href="{% url 'product:addToCart' item.item.barcode %}"> <i class="fas fa-plus mr2"></i> </a>
+                    </td>
+
+                    <td>{{item.getTotal}}</td>
+
+                    <td>
+                        <a href="{% url 'product:removeProductFromCart' item.item.barcode %}"> <i class="fas fa-trash float-right"></i></a>
+                    </td>
+                </tr>
+                {%empty%}
+                <tr>
+                    <td colspan="5">Your Cart isEmpty</td>
+                </tr>
+
+                <tr>
+                    <td colspan="5">
+                        <td colspan="4"><a href="{% url 'product:getProduct' %}" class="btn btn-info float-right ml-2">Continue Shopping</a></td>
+                </tr>
+                {% endfor %} {% if object.getTotalall %}
+                <tr>
+                    <tr>
+                        <td colspan="4">Order Total</td>
+                        <td class="font-weight-bold">{{object.getTotalall}}$</td>
+                    </tr>
+                    <td colspan="4"><a href="{% url 'product:checkout' %}" class="btn btn-warning float-right">Prceed to Checkout</a></td>
+
+                    <td colspan="4"><a href="{% url 'product:getProduct' %}" class="btn btn-info float-right ml-2">Continue Shopping</a></td>
+                </tr>
+                {% endif %}
+
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock body %}

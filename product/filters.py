@@ -1,6 +1,6 @@
 import django_filters
 from .models import Color,Category,Type,creator
-from product.models import Product
+from product.models import Order, Product
 
 
 
@@ -36,3 +36,17 @@ class ProductFilter(django_filters.FilterSet):
         model = Product
         fields ='__all__'
         exclude = ('img','priceIn','quantity','active',)
+
+class OrderFilter(django_filters.FilterSet):
+    order_date = django_filters.DateFromToRangeFilter(field_name='order_date',)  
+    class Meta:
+        model = Order
+        fields ='__all__'
+        exclude=('ordered')
+
+class Order2Filter(django_filters.FilterSet):
+    class Meta:
+        model = Order
+        fields =('user','emp')
+
+        

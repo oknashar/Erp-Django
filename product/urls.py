@@ -30,4 +30,22 @@ urlpatterns = [
    path('product/add',views.addProduct,name ='addProduct'),
    path('product/edit/<int:id>',views.edit_Product,name ='editProduct'),
    path('product/delete/<int:id>',views.delete_Product,name ='deleteProduct'),
+
+   path('product/addtocart/<slug:barcode>',views.add_to_cart,name ='addToCart'),
+   path('product/removefromcart/<slug:barcode>',views.remove_from_cart,name ='removeFromCart'),
+   path('product/removeproductfromcart/<slug:barcode>',views.remove_Product_from_cart,name ='removeProductFromCart'),
+
+   path('product/removeproductfromorder/<slug:barcode>/<int:id>',views.remove_Product_from_order,name ='removeProductfromOrder'),
+
+   path('product/ordersummery',views.OrderSummery.as_view(),name ='orderSummery'),
+   
+   path('product/addempfororder/<int:id>',views.updateOrder,name ='updateSummery'),
+
+   path('product/checkout',views.checkOut,name ='checkout'),
+
+   path('product/getOrders',views.getOrders,name ='Orders'),
+   path('product/getDayOrders',views.getDayOrders,name ='DayOrders'),
+
+   path('product/addProducttoCart',views.getDataAndPushInOrder,name ='addtoCart'),
+
 ]
