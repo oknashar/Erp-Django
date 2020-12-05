@@ -279,31 +279,34 @@ def delete_Product(request,id):
 @login_required
 def add_to_cart(request,barcode):
     item = get_object_or_404(Product,barcode=barcode)
-    item.quantity -=1
-    item.save()
-    order_item,created  = OrderItem.objects.get_or_create(
-        item=item,
-        user =request.user,
-        ordered =False
-        )
-    order_qs = Order.objects.filter(user=request.user,ordered=False)
-    if order_qs.exists():
-        order = order_qs[0]
-        #check if the order item is in order
-
-        if order.items.filter(item__barcode=item.barcode).exists():
-            order_item.quantity +=1
-            order_item.save()
-            messages.info(request,"this Product quantity was updated")
-            return redirect('product:orderSummery')
-        else:
-            messages.info(request,"this Product was added to your cart")
-            order.items.add(order_item)
-            return redirect('product:orderSummery')
+    if item.quantity <= 0:
+        messages.error(request,"لقد نفذت كمية المنتج")
     else:
-        order = Order.objects.create(user=request.user)
-        order.items.add(order_item)
-        messages.info(request,"this Product was added to your cart")
+        item.quantity -=1
+        item.save()
+        order_item,created  = OrderItem.objects.get_or_create(
+            item=item,
+            user =request.user,
+            ordered =False
+            )
+        order_qs = Order.objects.filter(user=request.user,ordered=False)
+        if order_qs.exists():
+            order = order_qs[0]
+            #check if the order item is in order
+
+            if order.items.filter(item__barcode=item.barcode).exists():
+                order_item.quantity +=1
+                order_item.save()
+                messages.info(request,"this Product quantity was updated")
+                return redirect('product:orderSummery')
+            else:
+                messages.info(request,"this Product was added to your cart")
+                order.items.add(order_item)
+                return redirect('product:orderSummery')
+        else:
+            order = Order.objects.create(user=request.user)
+            order.items.add(order_item)
+            messages.info(request,"this Product was added to your cart")
     return redirect('product:orderSummery')
 @login_required
 def remove_from_cart(request,barcode):
@@ -408,18 +411,20 @@ def checkOut(request):
     else:
         messages.error(request,'You Should select an employe')
     
-    return redirect('product:getProduct')
+    return redirect('product:orderSummery')
 
 
 
 def getOrders(request):
     order = Order.objects.filter(ordered =True)
     x=0
-    for ord in order:
-        x+=ord.getTotalall()
+    
     
     my_filter = OrderFilter(request.GET ,queryset=order)
     OrderList = my_filter.qs
+
+    for ord in OrderList:
+        x+=ord.getTotalall()
 
     context={
         'order':OrderList,
@@ -481,29 +486,32 @@ def getDataAndPushInOrder(request):
     if request.POST:
         barcode = request.POST.get('bar')
         item = get_object_or_404(Product,barcode=barcode)
-        item.quantity -=1
-        item.save()
-        order_item,created  = OrderItem.objects.get_or_create(
-            item=item,
-            user =request.user,
-            ordered =False
-            )
-        order_qs = Order.objects.filter(user=request.user,ordered=False)
-        if order_qs.exists():
-            order = order_qs[0]
-            #check if the order item is in order
-
-            if order.items.filter(item__barcode=item.barcode).exists():
-                order_item.quantity +=1
-                order_item.save()
-                messages.info(request,"this Product quantity was updated")
-                return redirect('product:orderSummery')
-            else:
-                messages.info(request,"this Product was added to your cart")
-                order.items.add(order_item)
-                return redirect('product:orderSummery')
+        if item.quantity <=0:
+            messages.error(request,"لقد نفذت كمية المنتج")
         else:
-            order = Order.objects.create(user=request.user)
-            order.items.add(order_item)
-            messages.info(request,"this Product was added to your cart")
+            item.quantity -=1
+            item.save()
+            order_item,created  = OrderItem.objects.get_or_create(
+                item=item,
+                user =request.user,
+                ordered =False
+                )
+            order_qs = Order.objects.filter(user=request.user,ordered=False)
+            if order_qs.exists():
+                order = order_qs[0]
+                #check if the order item is in order
+
+                if order.items.filter(item__barcode=item.barcode).exists():
+                    order_item.quantity +=1
+                    order_item.save()
+                    messages.info(request,"this Product quantity was updated")
+                    return redirect('product:orderSummery')
+                else:
+                    messages.info(request,"this Product was added to your cart")
+                    order.items.add(order_item)
+                    return redirect('product:orderSummery')
+            else:
+                order = Order.objects.create(user=request.user)
+                order.items.add(order_item)
+                messages.info(request,"this Product was added to your cart")
         return redirect('product:orderSummery')

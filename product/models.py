@@ -52,7 +52,7 @@ def image_upload(instance ,filename):
 class Product(models.Model):
     barcode = models.SlugField(("الباركود"),max_length = 20,blank=True, null=True,unique=True)
     name = models.ForeignKey(creator, verbose_name=("الاسم"), on_delete=models.CASCADE)
-    img = models.ImageField(("الصوره"),upload_to=image_upload, height_field=None, width_field=None, max_length=None,default='default.png')
+    img = models.ImageField(("الصوره"),upload_to=image_upload,default='default.png')
     typ = models.ForeignKey(Type, verbose_name=("النوع"), on_delete=models.CASCADE)
     category = models.ForeignKey(Category, verbose_name=("الصنف"), on_delete=models.CASCADE)
     color = models.ForeignKey(Color, verbose_name=("اللون"), on_delete=models.CASCADE)
