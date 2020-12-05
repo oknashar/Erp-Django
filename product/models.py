@@ -4,6 +4,11 @@ from employe.models import Employe
 from django.contrib.auth.models import User
 # Create your models here.
 
+import barcode
+from barcode.writer import ImageWriter
+from io import BytesIO
+from django.core.files import File
+
 class Color(models.Model):
     code = models.CharField(max_length=2,unique=True,verbose_name='الكود')
     name = models.CharField( max_length=50,verbose_name='الاسم')
@@ -11,8 +16,8 @@ class Color(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = 'Color'
-        verbose_name_plural = 'Colors'
+        verbose_name = 'اللون'
+        verbose_name_plural = 'الالوان'
 
 class Category(models.Model):
     code = models.CharField(max_length=2,unique=True,verbose_name='الكود')
@@ -21,8 +26,8 @@ class Category(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = 'Category'
-        verbose_name_plural = 'Categorys'
+        verbose_name = 'النوع'
+        verbose_name_plural = 'الانواع'
 
 class Type(models.Model):
     code = models.CharField(max_length=2,unique=True,verbose_name='الكود')
@@ -31,8 +36,8 @@ class Type(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = 'Type'
-        verbose_name_plural = 'Types'
+        verbose_name = 'الصنف'
+        verbose_name_plural = 'الاصناف'
 
 class creator(models.Model):
     code = models.CharField(max_length=4,unique=True,verbose_name='الكود')
@@ -41,8 +46,8 @@ class creator(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = 'creator'
-        verbose_name_plural = 'creators'
+        verbose_name = 'المصنع'
+        verbose_name_plural = 'المصانع'
 
 
 def image_upload(instance ,filename):
@@ -51,6 +56,7 @@ def image_upload(instance ,filename):
 
 class Product(models.Model):
     barcode = models.SlugField(("الباركود"),max_length = 20,blank=True, null=True,unique=True)
+    barcode_IMG = models.ImageField(("صورة الباركود"),upload_to='Barcodes/',blank=True)
     name = models.ForeignKey(creator, verbose_name=("الاسم"), on_delete=models.CASCADE)
     img = models.ImageField(("الصوره"),upload_to=image_upload,default='default.png')
     typ = models.ForeignKey(Type, verbose_name=("النوع"), on_delete=models.CASCADE)
@@ -67,13 +73,19 @@ class Product(models.Model):
          if not self.barcode:
             string =str(self.name.code)+str(self.typ.code)+str(self.category.code)+str(self.color.code)+str(self.size)
             self.barcode = slugify(string)
+
+         EAN = barcode.get_barcode_class('code128')
+         ean = EAN(f'{self.barcode}', writer=ImageWriter())
+         buffer = BytesIO()
+         ean.write(buffer)
+         self.barcode_IMG.save(f'{self.barcode}.png', File(buffer), save=False) 
          super(Product, self).save(*args, **kwargs) # Call the real save() method
     def __str__(self):
         string = str(self.typ)+' '+str(self.category)+' '+str(self.name)
         return string
     class Meta:
-        verbose_name = 'Product'
-        verbose_name_plural = 'Products'
+        verbose_name = 'المنتج'
+        verbose_name_plural = 'المنتجات'
 
 class OrderItem(models.Model):
     user  = models.ForeignKey(User, verbose_name=("الكاشير"), on_delete=models.CASCADE)
@@ -83,8 +95,8 @@ class OrderItem(models.Model):
     def __str__(self):
         return str(self.quantity)+' '+str(self.item) 
     class Meta:
-        verbose_name = 'OrderItem'
-        verbose_name_plural = 'OrderItems'
+        verbose_name = 'المباع'
+        verbose_name_plural = 'المباع'
     def getTotal(self):
         return self.quantity*self.item.priceOut
 
@@ -107,5 +119,5 @@ class Order(models.Model):
         return "\n".join([str(p) for p in self.items.all()])
 
     class Meta:
-        verbose_name = 'Order'
-        verbose_name_plural = 'Orders'
+        verbose_name = 'الفاتوره'
+        verbose_name_plural = 'الفواتير'

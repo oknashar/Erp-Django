@@ -35,7 +35,7 @@ class ProductFilter(django_filters.FilterSet):
     class Meta:
         model = Product
         fields ='__all__'
-        exclude = ('img','priceIn','quantity','active',)
+        exclude = ('img','priceIn','quantity','active','barcode_IMG')
 
 class OrderFilter(django_filters.FilterSet):
     order_date = django_filters.DateFromToRangeFilter(field_name='order_date',)  
